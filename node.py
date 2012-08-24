@@ -22,8 +22,17 @@ MY_SUBVERSION = ".4"
 
 settings = {}
 
-def new_block_event():
-	print "New block noticed"
+def new_block_event(block):
+	if block.is_valid():
+		print "New valid block noticed"
+	else:
+		print "New invalid block noticed"
+
+def new_transaction_event(tx):
+	if tx.is_valid():
+		print "New valid transaction noticed"
+	else:
+		print "New invalid transaction noticed"
 
 def sha256(s):
 	return hashlib.new('sha256',s).digest()
@@ -778,13 +787,10 @@ class NodeConn(asyncore.dispatcher):
 			if len(want.inv):
 				self.send_message(want)
 		elif message.command == "tx":
-			if not message.tx.is_valid():
-				print "invalid TX"
+			new_transaction_event(message.tx)
+
 		elif message.command == "block":
-			if not message.block.is_valid():
-				print "invalid block"
-			else:
-				new_block_event()
+			new_block_event(message.block)
 
 if __name__ == '__main__':
 	if len(sys.argv) != 2:
