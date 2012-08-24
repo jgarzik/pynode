@@ -798,5 +798,14 @@ class NodeConn(asyncore.dispatcher):
 			new_block_event(message.block)
 
 if __name__ == '__main__':
+	if len(sys.argv) == 2:
+		f = open(sys.argv[1])
+		for line in f:
+			m = re.search('^(\w+)\s*=\s*(\S.*)$', line)
+			if m is None:
+				continue
+			settings[m.group(1)] = m.group(2)
+		f.close()
+	settings['port'] = int(settings['port'])
 	c = NodeConn(settings['host'], settings['port'])
 	asyncore.loop()
