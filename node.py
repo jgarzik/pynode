@@ -29,15 +29,15 @@ settings = {
 
 def new_block_event(block):
 	if block.is_valid():
-		print "New valid block noticed"
+		print " - Valid Block: %s" % block.hash
 	else:
-		print "New invalid block noticed"
+		print " - Invalid Block: %s" % block.hash
 
 def new_transaction_event(tx):
 	if tx.is_valid():
-		print "New valid transaction noticed"
+		print " - Valid TX: %s" % tx.hash
 	else:
-		print "New invalid transaction noticed"
+		print " - Invalid TX: %s" % tx.hash
 
 def sha256(s):
 	return hashlib.new('sha256', s).digest()
