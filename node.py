@@ -15,7 +15,7 @@ import sys
 import re
 import random
 import cStringIO
-from Crypto.Hash import SHA256
+import hashlib
 
 MY_VERSION = 312
 MY_SUBVERSION = ".4"
@@ -24,6 +24,12 @@ settings = {}
 
 def new_block_event():
 	print "New block noticed"
+
+def sha256(s):
+	return hashlib.new('sha256',s).digest()
+
+def hash256(s):
+	return sha256(sha256(s))
 
 def deser_string(f):
 	nit = struct.unpack("<B", f.read(1))[0]
@@ -308,7 +314,7 @@ class CTransaction(object):
 		return r
 	def calc_sha256(self):
 		if self.sha256 is None:
-			self.sha256 = uint256_from_str(SHA256.new(SHA256.new(self.serialize()).digest()).digest())
+			self.sha256 = uint256_from_str(hash256(self.serialize()))
 	def is_valid(self):
 		self.calc_sha256()
 		for tout in self.vout:
@@ -355,7 +361,7 @@ class CBlock(object):
 			r += struct.pack("<I", self.nTime)
 			r += struct.pack("<I", self.nBits)
 			r += struct.pack("<I", self.nNonce)
-			self.sha256 = uint256_from_str(SHA256.new(SHA256.new(r).digest()).digest())
+			self.sha256 = uint256_from_str(hash256(r))
 	def is_valid(self):
 		self.calc_sha256()
 		target = uint256_from_compact(self.nBits)
@@ -371,7 +377,7 @@ class CBlock(object):
 			newhashes = []
 			for i in xrange(0, len(hashes), 2):
 				i2 = min(i+1, len(hashes)-1)
-				newhashes.append(SHA256.new(SHA256.new(hashes[i] + hashes[i2]).digest()).digest())
+				newhashes.append(hash256(hashes[i] + hashes[i2]))
 			hashes = newhashes
 		if uint256_from_str(hashes[0]) != self.hashMerkleRoot:
 			return False
@@ -721,8 +727,8 @@ class NodeConn(asyncore.dispatcher):
 				if len(self.recvbuf) < 4 + 12 + 4 + 4 + msglen:
 					return
 				msg = self.recvbuf[4+12+4+4:4+12+4+4+msglen]
-				th = SHA256.new(msg).digest()
-				h = SHA256.new(th).digest()
+				th = sha256(msg)
+				h = sha256(th)
 				if checksum != h[:4]:
 					raise ValueError("got bad checksum %s" % repr(self.recvbuf))
 				self.recvbuf = self.recvbuf[4+12+4+4+msglen:]
@@ -744,8 +750,8 @@ class NodeConn(asyncore.dispatcher):
 		tmsg += "\x00" * (12 - len(command))
 		tmsg += struct.pack("<I", len(data))
 		if self.ver_send >= 209:
-			th = SHA256.new(data).digest()
-			h = SHA256.new(th).digest()
+			th = sha256(data)
+			h = sha256(th)
 			tmsg += h[:4]
 		tmsg += data
 		self.sendbuf += tmsg
