@@ -354,6 +354,7 @@ class CBlock(object):
 		self.nNonce = 0
 		self.vtx = []
 		self.sha256 = None
+		self.hash = None
 	def deserialize(self, f):
 		self.nVersion = struct.unpack("<i", f.read(4))[0]
 		self.hashPrevBlock = deser_uint256(f)
@@ -382,6 +383,7 @@ class CBlock(object):
 			r += struct.pack("<I", self.nBits)
 			r += struct.pack("<I", self.nNonce)
 			self.sha256 = uint256_from_str(hash256(r))
+			self.hash = hash256(r)[::-1].encode('hex_codec')
 	def is_valid(self):
 		self.calc_sha256()
 		target = uint256_from_compact(self.nBits)
