@@ -204,7 +204,8 @@ def ser_int_vector(l):
 	return r
 
 def show_debug_msg(msg):
-	print "DEBUG: " + msg
+	if settings['debug']:
+		print "DEBUG: " + msg
 
 class CAddress(object):
 	def __init__(self):
@@ -752,13 +753,11 @@ class NodeConn(asyncore.dispatcher):
 				t.deserialize(f)
 				self.got_message(t)
 			else:
-				if settings['debug']:
-					show_debug_msg("Unknown command: '" + command + "' " + repr(msg))
+				show_debug_msg("Unknown command: '" + command + "' " + repr(msg))
 	def send_message(self, message, pushbuf=False):
 		if self.state != "connected" and not pushbuf:
 			return
-		if settings['debug']:
-			show_debug_msg("Send %s" % repr(message))
+		show_debug_msg("Send %s" % repr(message))
 		command = message.command
 		data = message.serialize()
 		tmsg = "\xf9\xbe\xb4\xd9"
@@ -775,8 +774,7 @@ class NodeConn(asyncore.dispatcher):
 	def got_message(self, message):
 		if self.last_sent + 30 * 60 < time.time():
 			self.send_message(msg_ping())
-		if settings['debug']:
-			show_debug_msg("recv %s" % repr(message))
+		show_debug_msg("recv %s" % repr(message))
 		if message.command  == "version":
 			if message.nVersion >= 209:
 				self.send_message(msg_verack())
