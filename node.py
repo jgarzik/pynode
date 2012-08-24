@@ -20,7 +20,11 @@ import hashlib
 MY_VERSION = 312
 MY_SUBVERSION = ".4"
 
-settings = {}
+# Default Settings if no configuration file is given
+settings = {
+	"host": "173.242.112.53",
+	"port": 8333
+}
 
 def new_block_event(block):
 	if block.is_valid():
@@ -664,14 +668,15 @@ class NodeConn(asyncore.dispatcher):
 		vt.addrFrom.ip = "0.0.0.0"
 		vt.addrFrom.port = 0
 		self.send_message(vt, True)
-
-		print "connecting"
+		print "\n PyNode - MiniNode"
+		print " -------------------------------------------------------------------------"
+		print " Connecting to Bitcoin Node IP # " + settings['host'] + ":" + str(settings['port'])
 		try:
 			self.connect((dstaddr, dstport))
 		except:
 			self.handle_close()
 	def handle_connect(self):
-		print "connected"
+		print " Connected & Listening :)\n"
 		self.state = "connected"
 		#send version msg
 #		t = msg_version()
@@ -681,7 +686,7 @@ class NodeConn(asyncore.dispatcher):
 #		t.addrFrom.port = 0
 #		self.send_message(t)
 	def handle_close(self):
-		print "close"
+		print " Closing Conection ... bye :)"
 		self.state = "closed"
 		self.recvbuf = ""
 		self.sendbuf = ""
@@ -793,25 +798,14 @@ class NodeConn(asyncore.dispatcher):
 			new_block_event(message.block)
 
 if __name__ == '__main__':
-	if len(sys.argv) != 2:
-		print "Usage: node.py CONFIG-FILE"
-		sys.exit(1)
-
-	f = open(sys.argv[1])
-	for line in f:
-		m = re.search('^(\w+)\s*=\s*(\S.*)$', line)
-		if m is None:
-			continue
-		settings[m.group(1)] = m.group(2)
-	f.close()
-
-	if 'host' not in settings:
-		settings['host'] = '127.0.0.1'
-	if 'port' not in settings:
-		settings['port'] = 8333
-
+	if len(sys.argv) == 2:
+		f = open(sys.argv[1])
+		for line in f:
+			m = re.search('^(\w+)\s*=\s*(\S.*)$', line)
+			if m is None:
+				continue
+			settings[m.group(1)] = m.group(2)
+		f.close()
 	settings['port'] = int(settings['port'])
-
 	c = NodeConn(settings['host'], settings['port'])
 	asyncore.loop()
-
