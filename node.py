@@ -23,7 +23,8 @@ MY_SUBVERSION = ".4"
 # Default Settings if no configuration file is given
 settings = {
 	"host": "173.242.112.53",
-	"port": 8333
+	"port": 8333,
+	"debug": False
 }
 
 def new_block_event(block):
@@ -201,6 +202,9 @@ def ser_int_vector(l):
 	for i in l:
 		r += struct.pack("<i", i)
 	return r
+
+def show_debug_msg(msg):
+	print "DEBUG: " + msg
 
 class CAddress(object):
 	def __init__(self):
@@ -631,10 +635,6 @@ class msg_ping(object):
 	def __repr__(self):
 		return "msg_ping()"
 
-
-
-
-
 class NodeConn(asyncore.dispatcher):
 	messagemap = {
 		"version": msg_version,
@@ -752,11 +752,13 @@ class NodeConn(asyncore.dispatcher):
 				t.deserialize(f)
 				self.got_message(t)
 			else:
-				print "UNKNOWN COMMAND", command, repr(msg)
+				if settings['debug']:
+					show_debug_msg("Unknown command: '" + command + "' " + repr(msg))
 	def send_message(self, message, pushbuf=False):
 		if self.state != "connected" and not pushbuf:
 			return
-		print "send %s" % repr(message)
+		if settings['debug']:
+			show_debug_msg("Send %s" % repr(message))
 		command = message.command
 		data = message.serialize()
 		tmsg = "\xf9\xbe\xb4\xd9"
@@ -773,7 +775,8 @@ class NodeConn(asyncore.dispatcher):
 	def got_message(self, message):
 		if self.last_sent + 30 * 60 < time.time():
 			self.send_message(msg_ping())
-		print "recv %s" % repr(message)
+		if settings['debug']:
+			show_debug_msg("recv %s" % repr(message))
 		if message.command  == "version":
 			if message.nVersion >= 209:
 				self.send_message(msg_verack())
