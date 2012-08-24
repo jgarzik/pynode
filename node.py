@@ -318,6 +318,7 @@ class CTransaction(object):
 		self.vout = []
 		self.nLockTime = 0
 		self.sha256 = None
+		self.hash = None
 	def deserialize(self, f):
 		self.nVersion = struct.unpack("<i", f.read(4))[0]
 		self.vin = deser_vector(f, CTxIn)
@@ -333,6 +334,7 @@ class CTransaction(object):
 	def calc_sha256(self):
 		if self.sha256 is None:
 			self.sha256 = uint256_from_str(hash256(self.serialize()))
+		self.hash = hash256(self.serialize())[::-1].encode('hex_codec')
 	def is_valid(self):
 		self.calc_sha256()
 		for tout in self.vout:
