@@ -20,7 +20,10 @@ import hashlib
 MY_VERSION = 312
 MY_SUBVERSION = ".4"
 
-settings = {}
+settings = {
+	"host": "127.0.0.1",
+	"port": 8333
+}
 
 def new_block_event(block):
 	if block.is_valid():
@@ -793,25 +796,5 @@ class NodeConn(asyncore.dispatcher):
 			new_block_event(message.block)
 
 if __name__ == '__main__':
-	if len(sys.argv) != 2:
-		print "Usage: node.py CONFIG-FILE"
-		sys.exit(1)
-
-	f = open(sys.argv[1])
-	for line in f:
-		m = re.search('^(\w+)\s*=\s*(\S.*)$', line)
-		if m is None:
-			continue
-		settings[m.group(1)] = m.group(2)
-	f.close()
-
-	if 'host' not in settings:
-		settings['host'] = '127.0.0.1'
-	if 'port' not in settings:
-		settings['port'] = 8333
-
-	settings['port'] = int(settings['port'])
-
 	c = NodeConn(settings['host'], settings['port'])
 	asyncore.loop()
-
