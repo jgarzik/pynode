@@ -40,7 +40,7 @@ def new_transaction_event(tx):
 		print "New invalid transaction noticed"
 
 def sha256(s):
-	return hashlib.new('sha256',s).digest()
+	return hashlib.new('sha256', s).digest()
 
 def hash256(s):
 	return sha256(sha256(s))
@@ -778,7 +778,7 @@ class NodeConn(asyncore.dispatcher):
 	def got_message(self, message):
 		if self.last_sent + 30 * 60 < time.time():
 			self.send_message(msg_ping())
-		show_debug_msg("recv %s" % repr(message))
+		show_debug_msg("Recv %s" % repr(message))
 		if message.command  == "version":
 			if message.nVersion >= 209:
 				self.send_message(msg_verack())
