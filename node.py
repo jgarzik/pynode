@@ -668,14 +668,15 @@ class NodeConn(asyncore.dispatcher):
 		vt.addrFrom.ip = "0.0.0.0"
 		vt.addrFrom.port = 0
 		self.send_message(vt, True)
-
-		print "connecting"
+		print "\n PyNode - MiniNode"
+		print " -------------------------------------------------------------------------"
+		print " Connecting to Bitcoin Node IP # " + settings['host'] + ":" + str(settings['port'])
 		try:
 			self.connect((dstaddr, dstport))
 		except:
 			self.handle_close()
 	def handle_connect(self):
-		print "connected"
+		print " Connected & Listening :)\n"
 		self.state = "connected"
 		#send version msg
 #		t = msg_version()
@@ -685,7 +686,7 @@ class NodeConn(asyncore.dispatcher):
 #		t.addrFrom.port = 0
 #		self.send_message(t)
 	def handle_close(self):
-		print "close"
+		print " Closing Conection ... bye :)"
 		self.state = "closed"
 		self.recvbuf = ""
 		self.sendbuf = ""
