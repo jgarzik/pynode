@@ -20,8 +20,9 @@ import hashlib
 MY_VERSION = 312
 MY_SUBVERSION = ".4"
 
+# Default Settings if no configuration file is given
 settings = {
-	"host": "127.0.0.1",
+	"host": "173.242.112.53",
 	"port": 8333
 }
 
