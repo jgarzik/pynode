@@ -29,18 +29,18 @@ settings = {
 
 def new_block_event(block):
 	if block.is_valid():
-		print "New valid block noticed"
+		print " - Valid Block: %s" % block.hash
 	else:
-		print "New invalid block noticed"
+		print " - Invalid Block: %s" % block.hash
 
 def new_transaction_event(tx):
 	if tx.is_valid():
-		print "New valid transaction noticed"
+		print " - Valid TX: %s" % tx.hash
 	else:
-		print "New invalid transaction noticed"
+		print " - Invalid TX: %s" % tx.hash
 
 def sha256(s):
-	return hashlib.new('sha256',s).digest()
+	return hashlib.new('sha256', s).digest()
 
 def hash256(s):
 	return sha256(sha256(s))
@@ -318,6 +318,7 @@ class CTransaction(object):
 		self.vout = []
 		self.nLockTime = 0
 		self.sha256 = None
+		self.hash = None
 	def deserialize(self, f):
 		self.nVersion = struct.unpack("<i", f.read(4))[0]
 		self.vin = deser_vector(f, CTxIn)
@@ -333,6 +334,7 @@ class CTransaction(object):
 	def calc_sha256(self):
 		if self.sha256 is None:
 			self.sha256 = uint256_from_str(hash256(self.serialize()))
+		self.hash = hash256(self.serialize())[::-1].encode('hex_codec')
 	def is_valid(self):
 		self.calc_sha256()
 		for tout in self.vout:
@@ -352,6 +354,7 @@ class CBlock(object):
 		self.nNonce = 0
 		self.vtx = []
 		self.sha256 = None
+		self.hash = None
 	def deserialize(self, f):
 		self.nVersion = struct.unpack("<i", f.read(4))[0]
 		self.hashPrevBlock = deser_uint256(f)
@@ -380,6 +383,7 @@ class CBlock(object):
 			r += struct.pack("<I", self.nBits)
 			r += struct.pack("<I", self.nNonce)
 			self.sha256 = uint256_from_str(hash256(r))
+			self.hash = hash256(r)[::-1].encode('hex_codec')
 	def is_valid(self):
 		self.calc_sha256()
 		target = uint256_from_compact(self.nBits)
@@ -774,7 +778,7 @@ class NodeConn(asyncore.dispatcher):
 	def got_message(self, message):
 		if self.last_sent + 30 * 60 < time.time():
 			self.send_message(msg_ping())
-		show_debug_msg("recv %s" % repr(message))
+		show_debug_msg("Recv %s" % repr(message))
 		if message.command  == "version":
 			if message.nVersion >= 209:
 				self.send_message(msg_verack())
