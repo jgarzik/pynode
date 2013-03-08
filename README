@@ -16,6 +16,7 @@ tasks.
 
 Dependencies:
 
+	python-bitcoinlib, https://github.com/jgarzik/python-bitcoinlib
 	GEvent, http://www.gevent.org/
 	python-leveldb, http://code.google.com/p/py-leveldb/
 
