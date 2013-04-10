@@ -39,8 +39,6 @@ netmagic = NETWORKS[MY_NETWORK]
 chaindb = ChainDb.ChainDb(SETTINGS, SETTINGS['db'], log, mempool, netmagic,
 			  True)
 
-outf = open('bootstrap.dat', 'wb')
-
 scanned = 0
 failures = 0
 
