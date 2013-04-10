@@ -27,7 +27,7 @@ NETWORKS = [
 
 # Default Settings if no configuration file is given
 settings = {
-	"host": "173.242.112.53",
+	"host": "127.0.0.1",
 	"port": 8333,
 	"debug": False
 }
