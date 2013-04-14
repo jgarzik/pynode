@@ -13,6 +13,7 @@ import MemPool
 import ChainDb
 import cStringIO
 import struct
+import argparse
 
 from bitcoin.coredefs import NETWORKS
 from bitcoin.core import CBlock
@@ -33,18 +34,36 @@ MY_NETWORK = 'mainnet'
 
 SETTINGS = NET_SETTINGS[MY_NETWORK]
 
-log = Log.Log(SETTINGS['log'])
+opts = argparse.ArgumentParser(description='Create blockchain datafile')
+opts.add_argument('--latest', dest='latest', action='store_true')
+
+args = opts.parse_args()
+
+# to log to a file
+# log = Log.Log(SETTINGS['log'])
+
+# stdout logging
+log = Log.Log()
+
 mempool = MemPool.MemPool(log)
 netmagic = NETWORKS[MY_NETWORK]
 chaindb = ChainDb.ChainDb(SETTINGS, SETTINGS['db'], log, mempool, netmagic,
 			  True)
 
-outf = open('bootstrap.dat', 'wb')
+if args.latest:
+	scan_height = chaindb.getheight()
+else:
+	scan_height = 216116
+	
+out_fn = 'bootstrap.dat'
+log.write("Outputting to %s, up to height %d" % (out_fn, scan_height))
+
+outf = open(out_fn, 'wb')
 
 scanned = 0
 failures = 0
 
-for height in xrange(216116+1):
+for height in xrange(scan_height+1):
 	heightidx = ChainDb.HeightIdx()
 	heightstr = str(height)
 	try:
