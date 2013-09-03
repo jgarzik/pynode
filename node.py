@@ -493,6 +493,12 @@ if __name__ == '__main__':
 	# connect to specified remote node
 	c = peermgr.add(settings['host'], settings['port'])
 	threads.append(c)
+	
+	if settings['addnodes']:
+                for node in settings['addnodes'].split():
+                        c = peermgr.add(node, settings['port'])
+                        threads.append(c)
+                        time.sleep(2)
 
 	# program main loop
 	def start(timeout=None):
