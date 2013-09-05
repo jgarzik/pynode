@@ -494,7 +494,7 @@ if __name__ == '__main__':
 	c = peermgr.add(settings['host'], settings['port'])
 	threads.append(c)
 	
-	if settings['addnodes']:
+	if 'addnodes' in settings and settings['addnodes']:
                 for node in settings['addnodes'].split():
                         c = peermgr.add(node, settings['port'])
                         threads.append(c)
