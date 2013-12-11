@@ -18,18 +18,15 @@ import cStringIO
 import hashlib
 
 MY_VERSION = 312
-MY_SUBVERSION = ".4"
+MY_SUBVERSION = "/pynode:0.0.1/"
 
-NETWORKS = [
-	"\xf9\xbe\xb4\xd9", # mainnet
-	"\xfa\xbf\xb5\xda", # testnet3
-]
 
 # Default Settings if no configuration file is given
 settings = {
 	"host": "127.0.0.1",
 	"port": 8333,
-	"debug": False
+	"debug": False,
+	"network": "mainnet"
 }
 
 def new_block_event(block):
@@ -659,6 +656,10 @@ class NodeConn(asyncore.dispatcher):
 		"getaddr": msg_getaddr,
 		"ping": msg_ping
 	}
+	MAGIC_BYTES = {
+	"mainnet": "\xf9\xbe\xb4\xd9", # mainnet
+	"testnet3": "\x0b\x11\x09\x07" # testnet3
+	}
 	def __init__(self, dstaddr, dstport):
 		asyncore.dispatcher.__init__(self)
 		self.dstaddr = dstaddr
@@ -730,7 +731,7 @@ class NodeConn(asyncore.dispatcher):
 		while True:
 			if len(self.recvbuf) < 4:
 				return
-			if self.recvbuf[:4] not in NETWORKS:
+			if self.recvbuf[:4] != self.MAGIC_BYTES[settings['network']]:
 				raise ValueError("got garbage %s" % repr(self.recvbuf))
 			if self.ver_recv < 209:
 				if len(self.recvbuf) < 4 + 12 + 4:
@@ -769,7 +770,7 @@ class NodeConn(asyncore.dispatcher):
 		show_debug_msg("Send %s" % repr(message))
 		command = message.command
 		data = message.serialize()
-		tmsg = "\xf9\xbe\xb4\xd9"
+		tmsg = self.MAGIC_BYTES[settings['network']]
 		tmsg += command
 		tmsg += "\x00" * (12 - len(command))
 		tmsg += struct.pack("<I", len(data))
