@@ -394,6 +394,8 @@ class ChainDb(object):
 		# all TX's in block are connectable; index
 		neverseen = 0
 		for tx in block.vtx:
+                        tx.calc_sha256()
+
 			if not self.mempool.remove(tx.sha256):
 				neverseen += 1
 
